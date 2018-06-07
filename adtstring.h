@@ -93,9 +93,9 @@
 //Start : Definition of String.
 typedef struct String
 {
-	char *data; //Points to the character array on heap.
-	size_t length; //length of character array (excluding '\0' at the end).
-} String; //string is an Alias of typedef struct string.
+	char *data; //Points to the 'string' on the heap.
+	size_t length; //length of 'string' (excluding '\0' at the end).
+} String; //string is an Alias of typedef struct string OR 'String'.
 //End : Definition of String.
 //END : GLOBAL VARIABLE SECTION.
 
@@ -138,12 +138,12 @@ int DS_String_is_float(String);
 //Start : Definiton of creator functions.
 String* DS_create_String_array(size_t size)
 /*
- *Creates a new string array on heap.
+ *Creates a new 'String' array on heap.
  *Array is of size 'size'.
- *'size' must be a natural number.
+ *'size' must be an integer greater than '0' and smaller than 'INT_MAX'.
  *Every string in the array is set to 'NaS'.
  *Returns the starting address of the array.
- *If not enough memory, or 'size' is '0', will return 'NULL' instead.
+ *If not enough memory, or 'size' <= '0', will return 'NULL' instead.
 */
 {
 	//Arrauy with size = 0 does not exit.

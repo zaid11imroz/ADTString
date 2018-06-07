@@ -6,7 +6,7 @@
  * Purpose : Dynamic String API.                                              |
  * Codename : adtstring.                                                      |
  * Author : Zaid Imroz.                                                       |
- * Copyrights : Reserved by the Autor of the this file. But everyone can      |
+ * Copyrights : Reserved by the Author of the this file. But everyone can     |
                 use this file or its contents as and when needed.             |
 =============================================================================*/
 

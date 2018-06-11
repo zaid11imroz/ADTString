@@ -42,17 +42,7 @@
             people ('Strings') with the same tooth brush is a bad idea.
             A disease from one could spread to the other plus it's creapy.
 
- * NOTE 4 : A violation of 'uniqueness' is tolerable iff
-            the intent of the assignment is to associate the 'string' pointed
-			by the 'String' on right hand side to the 'String' on the left hand
-			side. and the "String" on the right hand side
-			is guaranteed to never interfere with the 'String'
-			on the left hand side (for instance a 'Strring' returned by a
-			function call can be assigned to another "String" OR a 'String'
-			which is going to point to some other 'string' can be assigned to
-			another 'String').
-
- * NOTE 5 : The 'Strings' created on the stack and the 'Strings' created
+ * NOTE 4 : The 'Strings' created on the stack and the 'Strings' created
             on the heap, both have 'strings' associated to them
 			that are created on the heap.
 
@@ -74,13 +64,10 @@
  *'NaS' is a special and the only 'String'
   which is not associated to any 'string' at all.
 
- *Every 'String' must be set to 'NaS' initially using "DS_new_String()" function.
-  "DS_create_String_array()" uses "DS_new_String()" function to set members of
-  'String' array to 'NaS'.
+ *Every 'String' must be set to 'NaS' initially using "DS_new_String()"
+  function.
 
- *Every failed operation by any function
-  except 'DS_create_String_array()', is also indicated by
-  returning 'NaS'.
+  	e.g.: String str = DS_new_String();
 
  *Every operation with "NaS" as its operand will yield "NaS"
   as a result except 'DS_is_valid_String()' function.

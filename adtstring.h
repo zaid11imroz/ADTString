@@ -46,12 +46,14 @@
             on the heap, both have 'strings' associated to them
 			that are created on the heap.
 
-            They must be freed before end of scope, using an appropriate
-			function provided in the API to avoid dangling pointers.
-			One exception to this is 'NaS' which is not needed to be freed anywhere
-			int the program.
+            They must be freed before end of the scope in which they are
+			defined, using an appropriat function provided in this API
+			to avoid dangling pointers.
 
-			'NaS' is defined to be associated with no 'string' at all.
+			One exception to this rule is 'NaS' which is not needed to be
+			freed anywhere in the program.
+
+			'NaS' is designed to be associated with no 'string' at all.
 */
 
 
@@ -66,8 +68,7 @@
 
  *Every 'String' must be set to 'NaS' initially using "DS_new_String()"
   function.
-
-  	e.g.: String str = DS_new_String();
+	e.g.: String str = DS_new_String();
 
  *Every operation with "NaS" as its operand will yield "NaS"
   as a result except 'DS_is_valid_String()' function.
@@ -95,12 +96,12 @@ String DS_create_empty_String();
 String DS_get_String();
 String DS_get_line();
 String DS_init_String(char []);
+String DS_clone_String(const String);
 //End : Creator function signatures.
 
 //Start : Transformer function signatures.
 void DS_reset_String(String*);
-String DS_concat_String(String, String);
-String DS_clone_String(String);
+String DS_concat_String(String, const String);
 String DS_reverse_String(String);
 int DS_String_to_int(String);
 int DS_String_to_char(String, size_t);
@@ -108,15 +109,15 @@ double DS_String_to_float(String);
 //End : Transformer function signatures.
 
 //Start : Reporter function signatures.
-int DS_compare_String(String, String);
-int DS_is_NaS(String);
-int DS_is_empty_String(String);
-int DS_is_identical_String(String, String);
-void DS_print_String(String);
-void DS_print_line(String);
-int DS_String_is_int(String);
-int DS_String_is_char(String);
-int DS_String_is_float(String);
+int DS_compare_String(const String, const String);
+int DS_is_NaS(const String);
+int DS_is_empty_String(const String);
+int DS_is_identical_String(const String, const String);
+void DS_print_String(const String);
+void DS_print_line(const String);
+int DS_String_is_int(const String);
+int DS_String_is_char(const String);
+int DS_String_is_float(const String);
 //End : Reporter function signatures.
 //END OF FUNCTION DECLARATION SECTION.
 
@@ -208,7 +209,7 @@ String DS_get_String()
 	while((c = getchar()) != EOF)
 	{
 		//Placing at indices starting from '0' in 's.data'.
-		s.data[s.length] = (char)c;
+		s.data[s.length] = (char)c; //We can use 's.length++'
 		++s.length;
 
 		//Checking if 's.length' has reached last index i.e. "limit - 1"
@@ -382,7 +383,7 @@ void DS_reset_String(String *s)
 	(*s) = DS_new_String();
 }
 
-String DS_concat_String(String one, String two)
+String DS_concat_String(String one,const String two)
 /*
 *Takes two strings as arguments.
 *If any of the two strings is 'NaS', returns 'NaS'.
@@ -397,17 +398,15 @@ String DS_concat_String(String one, String two)
 	if((DS_is_NaS(one)) || (DS_is_NaS(two)))
 		return NaS;
 
-	String s = DS_new_String();
-
 	//Checking if any string is an empty string.
 	if(0 != (one.length + two.length))
 	{
 		//If atleast one string is non empty then.
 		//Allocating memory for character array 's.data'.
-		s.data = malloc((one.length + two.length + 1));
+		one.data = realloc(one.data, (one.length + two.length + 1));
 
 		//If allocation failed then return 'NaS'.
-		if(NULL == s.data)
+		if(NULL == one.data)
 		 	return NaS;
 
 		//Copy both character arrays 'one.data' & 'two.data'
@@ -503,7 +502,7 @@ int DS_String_to_char(String s, size_t index)
 		return 0;
 
 	if(index >= s.length)
-		return -1;
+		return '\0';
 
 	return s.data[index];
 }

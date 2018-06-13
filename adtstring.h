@@ -3,11 +3,11 @@
 
 
 /*============================================================================|
- * Purpose : Dynamic String API.                                              |
+ * Purpose : C API for Dynamic Strings.                                       |
  * Codename : adtstring.                                                      |
  * Author : Zaid Imroz.                                                       |
- * Copyrights : Reserved by the Author of the this file. But everyone can     |
-                use this file or its contents as and when needed.             |
+ * Copyrights : Reserved by the Author. But everyone can use this file        |
+  				or its contents as and when needed.							  |
 =============================================================================*/
 
 
@@ -24,34 +24,37 @@
 
  * NOTE 1 : In this document "String" (with an uppercase 'S') refers to a
             user defined datatype and must not be confused with the
-			'string' (with a lowercase 's') which is defined above.
+			'string' (with a lowercase 's') which is as defined above.
 
  * NOTE 2 : Every 'string' created in the memory is associated
-            to one and only one 'String' i.e. no two 'Strings' can point
+            to one and only one 'String' i.e. no two 'Strings' must point
 			to the same 'string' in the memory.
             This will be referred to as the 'uniqueness' property.
 
  * NOTE 3 : Using assignment operator on 'Strings' will cause two "Strings"
-            to get associated to the same 'string' and is in the violation of
+            to get associated to the same 'string' and is a violation of
             the 'uniqueness' property.
 
             If the 'uniqueness' is violated, this API can no longer
-            guarantee the consistency of data it's meant to handle.
+            guarantee the consistency of data it's meant to handle and in the
+			worst case this can lead to memory leakage.
 
             As an analogy, consider a 'string' to be a tooth brush and two
             people ('Strings') with the same tooth brush is a bad idea.
             A disease from one could spread to the other plus it's creapy.
 
- * NOTE 4 : The 'Strings' created on the stack and the 'Strings' created
-            on the heap, both have 'strings' associated to them
-			that are created on the heap.
+ * NOTE 4 : The 'Strings' created at compile time and the 'Strings' created
+            at rumtime, both have 'strings' associated to them
+			that are created at runtime.
 
             They must be freed before end of the scope in which they are
 			defined, using an appropriat function provided in this API
-			to avoid dangling pointers.
+			to avoid dangling pointers and memory leakage.
 
 			One exception to this rule is 'NaS' which is not needed to be
-			freed anywhere in the program.
+			freed anywhere in the program. 'NaS' stands for 'Not a String'
+			and is a used as a 'sentinel String' to indicate return failures
+			and to maintain consistency.
 
 			'NaS' is designed to be associated with no 'string' at all.
 */
@@ -67,7 +70,8 @@
   which is not associated to any 'string' at all.
 
  *Every 'String' must be set to 'NaS' initially using "DS_new_String()"
-  function.
+  function. This is mandatory and must be done at the time of declaration of
+  a 'String'.
 	e.g.: String str = DS_new_String();
 
  *Every operation with "NaS" as its operand will yield "NaS"
@@ -81,9 +85,9 @@
 //Start : Definition of String.
 typedef struct String
 {
-	char *data; //Points to the 'string' on the heap.
-	size_t length; //length of 'string' (excluding '\0' at the end).
-} String; //string is an Alias of typedef struct string OR 'String'.
+	char *data; //Points to the 'string' at runtime.
+	size_t length; //hold length of 'string' (excluding '\0' at the end).
+} String; //String is an Alias of 'typedef struct String' a.k.a. 'String'.
 //End : Definition of String.
 //END : GLOBAL VARIABLE SECTION.
 
@@ -101,11 +105,11 @@ String DS_clone_String(const String);
 
 //Start : Transformer function signatures.
 void DS_reset_String(String*);
-String DS_concat_String(String, const String);
-String DS_reverse_String(String);
-int DS_String_to_int(String);
-int DS_String_to_char(String, size_t);
-double DS_String_to_float(String);
+String DS_concat_String(const String, const String);
+String DS_reverse_String(const String);
+int DS_String_to_int(const String);
+int DS_String_to_char(const String, size_t);
+double DS_String_to_float(const String);
 //End : Transformer function signatures.
 
 //Start : Reporter function signatures.
@@ -126,11 +130,12 @@ int DS_String_is_float(const String);
 //Start : Definiton of creator functions.
 String* DS_create_String_array(size_t size)
 /*
- *Creates a new 'String' array on heap.
+ *Creates a new 'String' array at runtime.
  *Array is of size 'size'.
  *'size' must be an integer greater than '0' and smaller than 'INT_MAX'.
- *Every string in the array is set to 'NaS'.
- *Returns the starting address of the array.
+ *'INT_MAX' is defined in 'limits.h'.
+ *Every 'String' in the array is set to 'NaS'.
+ *Returns the starting address of the 'String' array.
  *If not enough memory, or 'size' <= '0', will return 'NULL' instead.
 */
 {
@@ -138,24 +143,25 @@ String* DS_create_String_array(size_t size)
 	if(0 == size)
 		return NULL;
 
-	//Allocating memory on heap for 'String' array of given size.
+	//Allocating memory for 'String' array of given size.
 	String *s = malloc(size * sizeof(String));
 
-	//if out of memory then return 'NULL'.
+	//If out of memory then return 'NULL'.
 	if(NULL == s)
 		return NULL;
 
-	//if allocated memory then initialize all 'Strings' to 'NaS'.
+	//If memory allocated, then initialize all 'Strings' to 'NaS'.
 	for(int i = 0; i < size; ++i)
 		s[i] = DS_new_String();
 
-	//All set, at this point, return 'String' pointer 's'.
+	//All set, at this point, return 'String' array 's'.
 	return s;
 }
 
 String DS_new_String()
 /*
  *Can set any string to 'NaS' by returning 'NaS'.
+ *Must be used with assignment operator in code.
 */
 {
 	return NaS;
@@ -163,10 +169,11 @@ String DS_new_String()
 
 String DS_create_empty_String()
 /*
- *Creates a valid but empty string on heap and returns
-  the string
- *An empty string contains only '\0' as a character.
- *If failsed due to lack of memory, returns 'NaS' instead.
+ *Creates a valid but empty "String" at runtime and returns
+  the 'String'.
+ *An empty 'String' contains only '\0' as a character in the 'string'
+  associated to it.
+ *If failed due to lack of memory, returns 'NaS' instead.
 */
 {
 	String s = DS_new_String();
@@ -187,40 +194,39 @@ String DS_create_empty_String()
 String DS_get_String()
 /*
  *Reads an input from 'stdin' untill 'EOF' is encountered.
- *Stores the input in a dynamically expanding string.
- *Returns the string.
+ *Stores the input in a 'String'.
+ *Returns the 'String'.
  *If not enough memory for the string returns 'NaS' instead.
 */
 {
 	String s = DS_new_String();
 
-	//Setting initial limit on the number of characters in the array 's.data'.
+	//Setting initial limit on the number of characters in the 'string'.
 	size_t limit = 256;
 
-	//Allocating memory for the array 's.data' on heap.
+	//Allocating memory for the 'string' with size equal to 'limit'.
 	s.data = malloc(limit);
 
 	//If allocation failed then return NaS.
 	if(NULL == s.data)
 		return NaS;
 
-	//taking input using getchar untill 'EOF' is encountered.
+	//Taking input from 'stdin' untill 'EOF' is encountered.
 	int c;
 	while((c = getchar()) != EOF)
 	{
-		//Placing at indices starting from '0' in 's.data'.
+		//Placing at indices starting from '0' in 'string'.
+		//s.length was set to '0' by 'DS_new_String()' function.
 		s.data[s.length] = (char)c; //We can use 's.length++'
 		++s.length;
 
-		//Checking if 's.length' has reached last index i.e. "limit - 1"
-		//of the array 's.data'.
+		//Checking if 'length' has reached last index i.e. "limit - 1"
 		if((limit - 1) == s.length)
 		{
-			//Doubling the limit for next input(s).
-			limit = limit<<1;
+			//Doubling the limit to accomodate remaining input characters.
+			limit = limit<<1; //Left Shift operator.
 
-			//Reallocating the array 's.data' with new size 'limit * 2'
-			//to some new location on heap.
+			//Reallocating the 'string' with new size.
 			s.data = realloc(s.data, limit);
 
 			//If failed then return 'NaS'.
@@ -229,56 +235,54 @@ String DS_get_String()
 		}
 	}
 
-	//At this point it is guaranteed that 's.length < (limit - 1)'.
-	//Appending '\0' at the end of the array 's.data'.
+	//At this point it is guaranteed that 'length' < '(limit - 1)'.
+	//Appending '\0' at the end.
 	s.data[s.length] = '\0';
 
-	//Reallocating the array 's.data' to a minimum required size
+	//Reallocating the 'string' to a minimum required size
 	//which is 's.length + 1'.
 	s.data = realloc(s.data, (s.length + 1));
 
-	//Return the newly created string 's' which
-	//has a char pointer 's.data' that points a string on heap and
-	//a size_t variable containing its length.
+	//Return the newly created 'String' which
+	//has a char pointer 's.data' that points to the 'string' and a
+	//size_t variable containing its length.
 	return s;
 }
 
 String DS_get_line()
 /*
  *Reads an input from 'stdin' untill 'EOF' or newline is encountered.
- *Stores the input in a dynamically expanding string.
- *Returns the string.
- *If not enough memory for the string returns 'NaS' instead.
+ *Stores the input in a "String".
+ *Returns the 'String'.
+ *If not enough memory for the 'String' returns 'NaS' instead.
 */
 {
 	String s = DS_new_String();
 
-	//Setting initial limit on the number of characters in the array 's.data'.
+	//Setting initial limit on the number of characters in the 'string'.
 	size_t limit = 256;
 
-	//Allocating memory for the array s.data on heap.
+	//Allocating memory for the 'string' with size equal to 'limit'.
 	s.data = malloc(limit);
 
 	//If allocation failed then return NaS.
 	if(NULL == s.data)
 		return NaS;
 
-	//taking input using getchar untill 'EOF' or newline is encountered.
+	//taking input using getchar untill 'EOF' or 'newline' is encountered.
 	int c;
 	while(((c = getchar()) != EOF) && (c != '\n'))
 	{
 		s.data[s.length] = (char)c;
 		++s.length;
 
-		//Checking if s.length has reached last index i.e. "limit - 1"
-		//of the array 's.data'.
+		//Checking if 'length' has reached last index i.e. "limit - 1"
 		if((limit - 1) == s.length)
 		{
-			//Doubling the limit for next input(s).
-			limit = limit<<1;
+			//Doubling the limit to accomodate remaining input characters.
+			limit = limit<<1; //Left Shift operator.
 
-			//Reallocating the array 's.data' with new size 'limit * 2'
-			//to some new location on heap.
+			//Reallocating the 'string' with new size.
 			s.data = realloc(s.data, limit);
 
 			//If failed then return 'NaS'.
@@ -287,17 +291,17 @@ String DS_get_line()
 		}
 	}
 
-	//At this point it is guaranteed that 's.length < (limit - 1)'.
-	//Appending '\0' at the end of the array 's.data'.
+	//At this point it is guaranteed that 'length' < '(limit - 1)'.
+	//Appending '\0' at the end.
 	s.data[s.length] = '\0';
 
-	//Reallocating the array 's.data' to a minimum required size
+	//Reallocating the 'string' to a minimum required size
 	//which is 's.length + 1'.
 	s.data = realloc(s.data, (s.length + 1));
 
-	//Return the newly created string 's' which
-	//has a char pointer s.data that points a string on heap and
-	//a size_t variable containing its length.
+	//Return the newly created 'String' which
+	//has a char pointer 's.data' that points to the 'string' and a
+	//size_t variable containing its length.
 	return s;
 }
 
@@ -398,15 +402,16 @@ String DS_concat_String(String one,const String two)
 	if((DS_is_NaS(one)) || (DS_is_NaS(two)))
 		return NaS;
 
+	String s = DS_new_String();
 	//Checking if any string is an empty string.
 	if(0 != (one.length + two.length))
 	{
 		//If atleast one string is non empty then.
 		//Allocating memory for character array 's.data'.
-		one.data = realloc(one.data, (one.length + two.length + 1));
+		s.data = realloc(one.data, (one.length + two.length + 1));
 
 		//If allocation failed then return 'NaS'.
-		if(NULL == one.data)
+		if(NULL == s.data)
 		 	return NaS;
 
 		//Copy both character arrays 'one.data' & 'two.data'

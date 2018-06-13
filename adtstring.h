@@ -6,7 +6,7 @@
  * Purpose : C API for Dynamic Strings.                                       |
  * Codename : adtstring.                                                      |
  * Author : Zaid Imroz.                                                       |
- * Copyrights : Reserved by the Author. But everyone can use this file        |
+ * Copyrights : Reserved by the Author. But anyone can use this file        |
   				or its contents as and when needed.							  |
 =============================================================================*/
 
@@ -132,8 +132,7 @@ String* DS_create_String_array(size_t size)
 /*
  *Creates a new 'String' array at runtime.
  *Array is of size 'size'.
- *'size' must be an integer greater than '0' and smaller than 'INT_MAX'.
- *'INT_MAX' is defined in 'limits.h'.
+ *'size' must be an integer greater than '0'.
  *Every 'String' in the array is set to 'NaS'.
  *Returns the starting address of the 'String' array.
  *If not enough memory, or 'size' <= '0', will return 'NULL' instead.
@@ -178,14 +177,14 @@ String DS_create_empty_String()
 {
 	String s = DS_new_String();
 
-	//Allocate '1' byte and set it to '\0'.
+	//Allocate '1' byte for 'string'.
 	s.data = malloc(1);
 
 	//If alloction failed, return 'NaS'.
 	if(NULL == s.data)
 		return NaS;
 
-	//If sucessful, set 's.data' to an empty string.
+	//If sucessful, set '\0' as the only character in the 'string'.
 	s.data[0] = '\0';
 
 	return s;
@@ -194,9 +193,9 @@ String DS_create_empty_String()
 String DS_get_String()
 /*
  *Reads an input from 'stdin' untill 'EOF' is encountered.
- *Stores the input in a 'String'.
+ *Makes a 'String' from the input.
  *Returns the 'String'.
- *If not enough memory for the string returns 'NaS' instead.
+ *If not enough memory returns 'NaS' instead.
 */
 {
 	String s = DS_new_String();
@@ -216,7 +215,7 @@ String DS_get_String()
 	while((c = getchar()) != EOF)
 	{
 		//Placing at indices starting from '0' in 'string'.
-		//s.length was set to '0' by 'DS_new_String()' function.
+		//s.length was set to '0' by 'DS_new_String()' function initially.
 		s.data[s.length] = (char)c; //We can use 's.length++'
 		++s.length;
 
@@ -240,12 +239,10 @@ String DS_get_String()
 	s.data[s.length] = '\0';
 
 	//Reallocating the 'string' to a minimum required size
-	//which is 's.length + 1'.
+	//which is 'Length + 1'.
 	s.data = realloc(s.data, (s.length + 1));
 
-	//Return the newly created 'String' which
-	//has a char pointer 's.data' that points to the 'string' and a
-	//size_t variable containing its length.
+	//Return the newly created 'String' that contains the 'string' and 'length'.
 	return s;
 }
 
@@ -296,30 +293,28 @@ String DS_get_line()
 	s.data[s.length] = '\0';
 
 	//Reallocating the 'string' to a minimum required size
-	//which is 's.length + 1'.
+	//which is 'Length + 1'.
 	s.data = realloc(s.data, (s.length + 1));
 
-	//Return the newly created 'String' which
-	//has a char pointer 's.data' that points to the 'string' and a
-	//size_t variable containing its length.
+	//Return the newly created 'String' that contains the 'string' and 'length'.
 	return s;
 }
 
 String DS_init_String(char c[])
 /*
- *Takes a string literal as an input.
- *creates a new string on heap.
- *Initialize the string to the given input.
- *Returns the newly created string.
+ *Takes a 'string' literal as an input.
+ *Creates a new 'String'.
+ *Stores given input in the 'String'.
+ *Returns the newly created 'String'.
  *If out of memory, returns 'NaS' instead.
 */
 {
 	String s = DS_new_String();
 
-	//Setting initial limit on the number of characters in the array 's.data'.
+	//Setting initial limit on the number of characters in the 'string'.
 	size_t limit = 256;
 
-	//Allocating memory for the array s.data on heap.
+	//Allocating memory for the 'string' with size equal to 'limit'.
 	s.data = malloc(limit);
 
 	//If allocation failed then return NaS.
@@ -327,22 +322,21 @@ String DS_init_String(char c[])
 		return NaS;
 
 	//tracersing array 'c' untill '\0' is encountered.
-	int i = 0;
+	int i = 0; //'s.length' is also equal to 'i' and could be used.
 	while('\0' != c[i])
 	{
+		//Copying contents to the 'string'.
 		s.data[s.length] = c[i];
 		++s.length;
 		++i;
 
-		//Checking if s.length has reached last index i.e. "limit - 1"
-		//of the array 's.data'.
+		//Checking if 'length' has reached last index i.e. "limit - 1"
 		if((limit - 1) == s.length)
 		{
-			//Doubling the limit for next input(s).
-			limit = limit<<1;
+			//Doubling the limit to accomodate remaining input characters.
+			limit = limit<<1; //Left Shift operator.
 
-			//Reallocating the array 's.data' with new size 'limit * 2'
-			//to some new location on heap.
+			//Reallocating the 'string' with new size.
 			s.data = realloc(s.data, limit);
 
 			//If failed then return 'NaS'.
@@ -351,17 +345,41 @@ String DS_init_String(char c[])
 		}
 	}
 
-	//At this point it is guaranteed that 's.length < (limit - 1)'.
-	//Appending '\0' at the end of the array 's.data'.
+	//At this point it is guaranteed that 'length' < '(limit - 1)'.
+	//Appending '\0' at the end.
 	s.data[s.length] = '\0';
 
-	//Reallocating the array 's.data' to a minimum required size
-	//which is 's.length + 1'.
+	//Reallocating the 'string' to a minimum required size
+	//which is 'Length + 1'.
 	s.data = realloc(s.data, (s.length + 1));
 
-	//Return the newly created string 's' which
-	//has a char pointer s.data that points a string on heap and
-	//a size_t variable containing its length.
+	//Return the newly created 'String' that contains the 'string' and 'length'.
+	return s;
+}
+
+String DS_clone_String(const String from)
+{
+	//If the input 'String' is 'NaS', return 'NaS'.
+	if(DS_is_NaS(from))
+		return NaS;
+
+	String s = DS_new_String();
+
+	//Allocating memory to clone input 'String'.
+	//Size equals length of input 'String' plus 1 for '\0'.
+	s.data = malloc(from.length + 1);
+
+	//If no memory, return 'NaS'.
+	if(NULL == s.data)
+		return NaS;
+
+	//Copy everything till '\0' at the index 'from.length'.
+	int i;
+	for(i = 0; i <= from.length; ++i)
+		s.data[i] = from.data[i];
+
+	s.length = from.length;
+
 	return s;
 }
 //End : Definition of creator functions.
@@ -369,53 +387,53 @@ String DS_init_String(char c[])
 //Start : Definition of transformer functions.
 void DS_reset_String(String *s)
 /*
- *Takes address of a string as an argument.
- *Frees the memory occupied by the string.
- *Sets the string to 'NaS'.
+ *Takes address of a 'String' as an argument.
+ *Frees the memory occupied by the 'String'.
+ *Sets the 'String' to 'NaS'.
+ *Returns 'NULL' if a 'NULL' pointer is passed.
 */
 {
-	//If pointer 's' points to nothng at all.
+	//If pointer is already 'NULL'.
 	if(NULL == s)
 		return;
 
-	//If '*s' is NaS.
+	//If '*s' is 'NaS'.
 	if(DS_is_NaS(*s))
 		return;
 
-	//If pointer 's' points to some valid string.
+	//If pointer 's' points to some valid 'String'.
 	free(s->data);
 	(*s) = DS_new_String();
 }
 
-String DS_concat_String(String one,const String two)
+String DS_concat_String(const String one,const String two)
 /*
-*Takes two strings as arguments.
-*If any of the two strings is 'NaS', returns 'NaS'.
-*If both strings are valid but empty strings, returns an empty string.
-*Else creates a new string,
- copies the data of both the strings in sequence from left to right,
- returns the string.
+*Takes two 'Strings' as arguments.
+*If any of the two 'Strings' is 'NaS', returns 'NaS'.
+*If both 'Strings' are valid but empty 'Strings, returns an empty 'String'.
+*Else creates a new 'String',
+ copies the data of both the 'Strings' (first 'one' then 'two')in it.
  *If out of memory, returns 'NaS' instead.
 */
 {
-	//Checking if any string is 'NaS'.
+	//Checking if any 'String' is 'NaS'.
 	if((DS_is_NaS(one)) || (DS_is_NaS(two)))
 		return NaS;
 
 	String s = DS_new_String();
-	//Checking if any string is an empty string.
+
+	//If any of the two has some data.
 	if(0 != (one.length + two.length))
 	{
-		//If atleast one string is non empty then.
-		//Allocating memory for character array 's.data'.
-		s.data = realloc(one.data, (one.length + two.length + 1));
+		//If atleast one 'String' is non empty then,
+		//Allocating memory for new 'String'.
+		s.data = malloc(one.length + two.length + 1);
 
 		//If allocation failed then return 'NaS'.
 		if(NULL == s.data)
 		 	return NaS;
 
-		//Copy both character arrays 'one.data' & 'two.data'
-		//in 's.data' one by one.
+		//Copy contents of both 'Strings' to the new 'String'.
 		int i;
 
 		//Copy all characters from 'one.data' to 's.data'.
@@ -429,7 +447,7 @@ String DS_concat_String(String one,const String two)
 		for(i = 0; i < two.length; ++i)
 			s.data[i + one.length] = two.data[i];
 
-		//Setting length of 's.data'.
+		//Setting length of 's'.
 		s.length = one.length + two.length;
 
 		//Append '\0' to 's.data' on the last index
@@ -441,34 +459,6 @@ String DS_concat_String(String one,const String two)
 
 	//If both strings are empty.
 	return DS_create_empty_String();
-}
-
-String DS_clone_String(String from)
-{
-	//If the string 'fomr' is 'NaS', return 'NaS'.
-	if(DS_is_NaS(from))
-		return NaS;
-
-	//If the string 'from' is an empty string,
-	// return empty string.
-	if(DS_is_empty_String(from))
-		return DS_create_empty_String();
-
-	String s = DS_new_String();
-
-	s.data = malloc(from.length + 1);
-
-	if(NULL == s.data)
-		return NaS;
-
-	int i;
-	for(i = 0; i < from.length; ++i)
-		s.data[i] = from.data[i];
-
-	s.data[from.length] = '\0';
-	s.length = from.length;
-
-	return s;
 }
 
 String DS_reverse_String(String s)

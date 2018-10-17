@@ -641,9 +641,8 @@ int DS_String_is_int(String s)
 int DS_String_is_char(String s)
 {
 	if((s.length == 0) || (s.length == 1))
-	{
 		return 1;
-	}
+	
 	return 0;
 }
 
@@ -653,9 +652,8 @@ int DS_String_is_float(String s)
 	for(i = 0; i < s.length; ++i)
 	{
 		if(state == 0)
-		{
 			return 0;
-		}
+		
 		is_digit = ((s.data[i] >= '0') && (s.data[i] <= '9'));
 		switch(state)
 		{
@@ -703,9 +701,8 @@ int DS_String_is_float(String s)
 						continue;
 					default :
 						if(is_digit)
-						{
 							continue;
-						}
+							
 						state = 0;
 						continue;
 				}
@@ -726,9 +723,8 @@ int DS_String_is_float(String s)
 						continue;
 					default :
 						if(is_digit)
-						{
 							continue;
-						}
+						
 						state = 0;
 						continue;
 				}
@@ -758,16 +754,14 @@ int DS_String_is_float(String s)
 				continue;
 			case 8 :
 				if(is_digit)
-				{
 					continue;
-				}
+				
 				state = 0;
 		}
 	}
 	if((state == 4) || (state == 5) || (state == 8))
-	{
 		return 1;
-	}
+	
 	return 0;
 }
 //End : Definition of reporter functons.

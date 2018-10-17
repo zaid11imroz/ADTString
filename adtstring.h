@@ -6,8 +6,8 @@
  * Purpose : C API for Dynamic Strings.                                       |
  * Codename : adtstring.                                                      |
  * Author : Zaid Imroz.                                                       |
- * Copyrights : Reserved by the Author. But anyone can use this file        |
-  				or its contents as and when needed.							  |
+ * Copyrights : Reserved by the Author. But anyone can use this file          |
+  				or its contents as and when needed.	      |
 =============================================================================*/
 
 
